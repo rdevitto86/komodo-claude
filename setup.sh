@@ -5,38 +5,29 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR="$REPO_DIR/claude"
 CLAUDE_DIR="$HOME/.claude"
 
-echo "komodo-claude: setting up symlinks from $REPO_DIR/claude → $CLAUDE_DIR"
+echo "komodo-claude: setting up symlinks from $SOURCE_DIR → $CLAUDE_DIR"
 
-# Ensure ~/.claude exists
 mkdir -p "$CLAUDE_DIR"
 
-# settings.json
-if [ -L "$CLAUDE_DIR/settings.json" ]; then
-  echo "  settings.json — already a symlink, skipping"
-elif [ -f "$CLAUDE_DIR/settings.json" ]; then
-  echo "  settings.json — backing up existing file to settings.json.bak"
-  mv "$CLAUDE_DIR/settings.json" "$CLAUDE_DIR/settings.json.bak"
-  ln -s "$REPO_DIR/claude/settings.json" "$CLAUDE_DIR/settings.json"
-  echo "  settings.json — linked"
-else
-  ln -s "$REPO_DIR/claude/settings.json" "$CLAUDE_DIR/settings.json"
-  echo "  settings.json — linked"
-fi
+for src in "$SOURCE_DIR"/*; do
+  name="$(basename "$src")"
+  dest="$CLAUDE_DIR/$name"
 
-# skills/
-if [ -L "$CLAUDE_DIR/skills" ]; then
-  echo "  skills/ — already a symlink, skipping"
-elif [ -d "$CLAUDE_DIR/skills" ]; then
-  echo "  skills/ — backing up existing directory to skills.bak"
-  mv "$CLAUDE_DIR/skills" "$CLAUDE_DIR/skills.bak"
-  ln -s "$REPO_DIR/claude/skills" "$CLAUDE_DIR/skills"
-  echo "  skills/ — linked"
-else
-  ln -s "$REPO_DIR/claude/skills" "$CLAUDE_DIR/skills"
-  echo "  skills/ — linked"
-fi
+  if [ -L "$dest" ]; then
+    echo "  $name — already a symlink, skipping"
+  elif [ -e "$dest" ]; then
+    echo "  $name — backing up existing to $name.bak"
+    mv "$dest" "${dest}.bak"
+    ln -s "$src" "$dest"
+    echo "  $name — linked"
+  else
+    ln -s "$src" "$dest"
+    echo "  $name — linked"
+  fi
+done
 
 echo ""
 echo "Done. Restart Claude Code to pick up the new settings."
