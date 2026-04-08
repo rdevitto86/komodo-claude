@@ -1,5 +1,5 @@
 ---
-name: electrical-engineer
+name: electronics
 description: Use for electrical circuit design, schematic review, PCB layout guidance, power system analysis, component selection, and electronics standards compliance.
 model: sonnet
 color: yellow
